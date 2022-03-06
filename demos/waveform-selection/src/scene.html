@@ -1,0 +1,33 @@
+<a-scene cursor="rayOrigin: mouse">
+  <require path="templates/assets.html"></require>
+
+  <!-- Box. -->
+  <a-entity
+    geometry="primitive: sphere; radius: 0.3"
+    material="color: #f00"
+    position="-1 0.5 -3"
+    rotation="0 45 0"
+    shadow
+    clickable
+  ></a-entity>
+  <a-entity playhead>
+    <a-entity
+      geometry="primitive: cylinder; height: 20; radius: 0.1"
+      material="color: #f00"
+      position="0 0 -50"
+      rotation="0 0 0"
+      shadow
+    ></a-entity>
+  </a-entity>
+  <a-curvedimage
+    src="#waveform-src"
+    height="30.0"
+    radius="50.7"
+    theta-length="360"
+    raycaster-listen
+  ></a-curvedimage>
+
+  <a-entity id="leftHand" oculus-touch-controls="hand: left;"></a-entity>
+  <a-entity id="rightHand" laser-controls="hand: right;"></a-entity>
+
+</a-scene>
