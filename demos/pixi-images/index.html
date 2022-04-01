@@ -1,19 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pixi Images</title>
-</head>
-<body>
-<script src="https://pixijs.download/release/pixi.js"></script>
-<script>
-    let app = new PIXI.Application({ width: 640, height: 360 });
-    document.body.appendChild(app.view)
-    // Magically load the PNG asynchronously
-    let sprite = PIXI.Sprite.from('sample.png');
-    app.stage.addChild(sprite);
-  </script>
-</body>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+    <script>
+      const size = {
+        width: window.innerWidth / window.devicePixelRatio,
+        height: window.innerHeight / window.devicePixelRatio,
+        // width: 800,
+        // height: 600,
+        resolution: window.devicePixelRatio || 1,
+      };
+      let app = new PIXI.Application(size);
+      document.body.appendChild(app.view);
+      // Magically load the PNG asynchronously NOW WITH EXTRA MAGIC
+      function randomizePosition(sprite) {
+        sprite.x = Math.random() * (size.height - sprite.width);
+        sprite.y = Math.random() * (size.width - sprite.height);
+      }
+
+      function brown(sprite) {
+        sprite.x += Math.random() - 0.5;
+        sprite.y += Math.random() - 0.5;
+      }
+
+      function addSprite(path) {
+        const sprite = PIXI.Sprite.from(path);
+        app.stage.addChild(sprite);
+        sprite.scale.x = sprite.scale.y = 0.5 / window.devicePixelRatio;
+        randomizePosition(sprite);
+        sprite.interactive = true
+        sprite.buttonMode = true
+        sprite.on('pointerdown', (event) => { alert('clicked!'); });
+        /*
+        TODO controls
+        x hide
+        s show (center, press again to zoom)
+        a accept (go to bg, reduce alpha)
+        */
+      }
+
+      async function loadSprites(dirUrl) {
+        const filesResponse = await fetch(`${dirUrl}/dir.json`);
+        const files = await filesResponse.json()
+        console.log(files);
+
+        const isImage = (str) => str.endsWith(".png");
+        const makeAbsolute = (filename) => `${dirUrl}/${filename}`;
+
+        const images = files.filter(isImage);
+        const paths = files.map(makeAbsolute);
+
+        return paths;
+      }
+
+      async function loadAndAddSprites(dirUrl) {
+        const paths = await loadSprites(dirUrl);
+        paths.forEach(addSprite);
+      }
+
+      loadAndAddSprites("/sample_content");
+
+      function tick(delta) {
+        app.stage.children.forEach(brown);
+      }
+
+      app.ticker.add(tick);
+
+      // let sprite = PIXI.Sprite.from('sample.png');
+      // app.stage.addChild(sprite);
+    </script>
+  </body>
 </html>
