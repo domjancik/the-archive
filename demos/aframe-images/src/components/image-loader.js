@@ -15,7 +15,7 @@ AFRAME.registerSystem("image-loader", {
     const imagePaths = await loadImages(this.data);
     console.log(imagePaths);
 
-    const imagePathsSubset = imagePaths.slice(0, 200);
+    const imagePathsSubset = imagePaths.slice(0, 300);
     imagePathsSubset.forEach(this.addImage.bind(this));
 
     window.s = this;
@@ -28,14 +28,14 @@ AFRAME.registerSystem("image-loader", {
 
     imageElement.setAttribute("src", src);
     const position = {
-      x: randomFromTo(-10, 10),
+      x: randomFromTo(-3, 3),
       y: randomFromTo(1, 3),
-      z: randomFromTo(-10, 10),
+      z: randomFromTo(-3, 3),
     };
     console.log(position);
     // TODO aspect correct ratio
-    imageElement.setAttribute("width", 1);
-    imageElement.setAttribute("height", 2/3);
+    imageElement.setAttribute("width", 1/2);
+    imageElement.setAttribute("height", 2/3/2);
     // TODO more reasonable positions
     imageElement.setAttribute("position", position);
 
