@@ -17,6 +17,7 @@
   <body>
     <script src="https://pixijs.download/release/pixi.js"></script>
     <script>
+      const INITIAL_SCALE = 0.05 / window.devicePixelRatio
       const size = {
         width: window.innerWidth / window.devicePixelRatio,
         height: window.innerHeight / window.devicePixelRatio,
@@ -24,12 +25,15 @@
         // height: 600,
         resolution: window.devicePixelRatio || 1,
       };
-      let app = new PIXI.Application(size);
+
+      const app = new PIXI.Application(size);
+
+
       document.body.appendChild(app.view);
       // Magically load the PNG asynchronously NOW WITH EXTRA MAGIC
       function randomizePosition(sprite) {
-        sprite.x = Math.random() * (size.height - sprite.width);
-        sprite.y = Math.random() * (size.width - sprite.height);
+        sprite.x = Math.random() * (size.width- sprite.width);
+        sprite.y = Math.random() * (size.height - sprite.height);
       }
 
       function brown(sprite) {
@@ -37,14 +41,43 @@
         sprite.y += Math.random() - 0.5;
       }
 
+      const grow = (amount) => (sprite) => {
+        sprite.scale.x += amount;
+        sprite.scale.y += amount;
+      };
+
+      const isHovered = ({ isHovered }) => isHovered;
+
       function addSprite(path) {
         const sprite = PIXI.Sprite.from(path);
         app.stage.addChild(sprite);
-        sprite.scale.x = sprite.scale.y = 0.5 / window.devicePixelRatio;
+        sprite.scale.set(INITIAL_SCALE);
         randomizePosition(sprite);
-        sprite.interactive = true
-        sprite.buttonMode = true
-        sprite.on('pointerdown', (event) => { alert('clicked!'); });
+        sprite.interactive = true;
+        sprite.buttonMode = true;
+        sprite.anchor.set(0.5);
+        sprite.alpha = 0.8;
+        // sprite.on('pointerdown', (event) => { alert('clicked!'); });
+        sprite.on("pointerover", (event) => {
+          sprite.alpha = 1;
+          sprite.isHovered = true;
+        });
+        sprite.on("pointerout", (event) => {
+          sprite.alpha = 0.8;
+          sprite.isHovered = false;
+        });
+        sprite.on("pointerdown", (event) => {
+          if (sprite.isZoomed) {
+              sprite.scale.set(INITIAL_SCALE);
+              sprite.isZoomed = false;
+          } else {
+              // Bring to front
+              app.stage.removeChild(sprite);
+              app.stage.addChild(sprite);
+              sprite.scale.set(1);
+              sprite.isZoomed = true;
+          }
+        });
         /*
         TODO controls
         x hide
@@ -53,29 +86,46 @@
         */
       }
 
-      async function loadSprites(dirUrl) {
-        const filesResponse = await fetch(`${dirUrl}/dir.json`);
-        const files = await filesResponse.json()
-        console.log(files);
+      const jsonFetcher = async (rootUrl) => {
+        const filesResponse = await fetch(`${rootUrl}/dir.json`);
+        const files = await filesResponse.json();
+        return files
+      }
+
+      const imageTxtFetcher = async (rootUrl) => {
+        const filesResponse = await fetch(`${rootUrl}/dir_jpg.txt`);
+        const filesString = await filesResponse.text();
+        return filesString.split('\n')
+      }
+
+      async function loadSprites(fetcher, dirUrl) {
+        const files = await fetcher(dirUrl)
+        console.log(files)
 
         const isImage = (str) => str.endsWith(".png");
+        const makeThumb = (filename) => `the-archive/thumbs/${filename.replace(/JPG$/, 'png')}`;
         const makeAbsolute = (filename) => `${dirUrl}/${filename}`;
 
+        // Question - Should thumb be contained as part of dir JSON? Would be good as file extension may change - client would not have to guess.
         const images = files.filter(isImage);
-        const paths = files.map(makeAbsolute);
+        const paths = files
+              .map(makeThumb)
+              .map(makeAbsolute);
 
         return paths;
       }
 
-      async function loadAndAddSprites(dirUrl) {
-        const paths = await loadSprites(dirUrl);
+      async function loadAndAddSprites(fetcher, dirUrl) {
+        const paths = await loadSprites(fetcher, dirUrl);
         paths.forEach(addSprite);
       }
 
-      loadAndAddSprites("/sample_content");
+    //   loadAndAddSprites(jsonFetcher, "/sample_content");
+      loadAndAddSprites(imageTxtFetcher, "http://localhost:7500");
 
       function tick(delta) {
-        app.stage.children.forEach(brown);
+        // app.stage.children.forEach(brown);
+        // app.stage.children.filter(isHovered).forEach(grow(0.001 * delta));
       }
 
       app.ticker.add(tick);
