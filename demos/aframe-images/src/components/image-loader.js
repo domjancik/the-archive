@@ -4,7 +4,8 @@ const { loadImages } = require("../load-utils");
 
 AFRAME.registerSystem("image-loader", {
   schema: {
-    default: "http://localhost:7500",
+    // default: "http://localhost:7500",
+    default: "/files",
   },
   init: function () {
     this.load();
