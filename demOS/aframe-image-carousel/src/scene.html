@@ -1,0 +1,28 @@
+<a-scene cursor="rayOrigin: mouse">
+  <require path="templates/assets.html"></require>
+
+  <!-- Box. -->
+
+  <a-entity id="leftHand" oculus-touch-controls="hand: left;"></a-entity>
+  <a-entity id="rightHand" laser-controls="hand: right;"></a-entity>
+
+  <a-entity circling-detector carousel-spawner position="0 0.5 0"></a-entity>
+
+  <a-entity camera position="0 4 0" rotation="-90 0 0">
+    <a-entity
+      data-debug
+      text="value: 1234; align: center"
+      position="0 0.7 -1"
+    ></a-entity>
+  </a-entity>
+
+  <a-plane
+    move-player
+    raycast
+    rotation="-90 0 0"
+    scale="10 10 10"
+    material="color: black"
+  >
+  </a-plane>
+  <a-sphere data-playermock scale="0.1 0.1 0.1"></a-sphere>
+</a-scene>
