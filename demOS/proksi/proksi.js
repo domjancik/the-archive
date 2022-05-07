@@ -1,9 +1,16 @@
-var proxy = require('express-http-proxy');
-var app = require('express')();
-const port = 443 
+const proxy = require("express-http-proxy");
+const app = require("express")();
+const https = require("https");
+const fs = require("fs");
 
-app.use('/proxy', proxy('localhost:9000'));
+const PORT = 443;
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+app.use("/proxy", proxy("localhost:9000"));
+
+const key = fs.readFileSync("./key.pem");
+const cert = fs.readFileSync("./cert.pem");
+const server = https.createServer({ key, cert }, app);
+
+server.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
+});
